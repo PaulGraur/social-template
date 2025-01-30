@@ -100,14 +100,19 @@ export default function InstagramProfile() {
 
   const handleDrop = (
     event: React.DragEvent<HTMLDivElement>,
-    index: number
+    targetIndex: number
   ) => {
     event.preventDefault();
+
     const draggedIndex = parseInt(event.dataTransfer.getData("imageIndex"));
+
+    if (draggedIndex === targetIndex) return;
+
     const updatedImages = [...images];
 
     const [draggedImage] = updatedImages.splice(draggedIndex, 1);
-    updatedImages.splice(index, 0, draggedImage);
+
+    updatedImages.splice(targetIndex, 0, draggedImage);
 
     setImages(updatedImages);
     saveImagesToLocalStorage(updatedImages);

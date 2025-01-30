@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Logo from "@/images/logo.jpg";
 
 interface ModalProps {
   isOpen: boolean;
@@ -30,8 +31,8 @@ const ProfileModalComponent = ({
   const toggleDeleteMenu = () => setShowDeleteMenu((prev) => !prev);
 
   const handleDeletePost = () => {
-    setShowDeleteConfirm(true); // Показуємо модальне вікно підтвердження
-    setShowDeleteMenu(false); // Закриваємо меню
+    setShowDeleteConfirm(true);
+    setShowDeleteMenu(false);
   };
 
   const confirmDelete = () => {
@@ -43,15 +44,14 @@ const ProfileModalComponent = ({
   };
 
   const cancelDelete = () => {
-    setShowDeleteConfirm(false); // Сховуємо модальне вікно підтвердження
+    setShowDeleteConfirm(false);
   };
 
   const closeDeleteMenu = () => {
-    setShowDeleteMenu(false); // Закриваємо меню при кліку в пустий простір
+    setShowDeleteMenu(false);
   };
 
   useEffect(() => {
-    // Закриваємо меню видалення при закритті модального вікна
     if (!isOpen) {
       setShowDeleteMenu(false);
     }
@@ -61,7 +61,7 @@ const ProfileModalComponent = ({
     isOpen && (
       <div
         className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center"
-        onClick={closeModal} // Закриваємо модальне вікно при кліку в порожній простір
+        onClick={closeModal}
       >
         <button
           onClick={closeModal}
@@ -88,19 +88,15 @@ const ProfileModalComponent = ({
           <div className="flex flex-col justify-between text-white w-[65%] py-4 px-8">
             <div className="flex items-center justify-between space-x-4">
               <div className="flex gap-[22px] items-center">
-                <div
-                  className="w-12 h-12 bg-gray-500 rounded-full"
-                  style={{
-                    backgroundImage: `url(${avatar || "/default-avatar.png"})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                ></div>
+                <Image
+                  src={Logo}
+                  alt="Logo"
+                  className="object-cover w-24 h-24 bg-gray-500 rounded-full"
+                />
 
                 <span className="text-lg font-semibold">{username}</span>
               </div>
 
-              {/* Кнопка трьох крапок */}
               <button
                 onClick={toggleDeleteMenu}
                 className="text-white relative"
@@ -109,7 +105,7 @@ const ProfileModalComponent = ({
                 {showDeleteMenu && (
                   <div
                     className="absolute right-0 bg-gray-700 rounded-md shadow-lg mt-2"
-                    onClick={closeDeleteMenu} // Закриваємо меню при кліку поза ним
+                    onClick={closeDeleteMenu}
                   >
                     <button
                       onClick={handleDeletePost}
@@ -142,15 +138,14 @@ const ProfileModalComponent = ({
           </div>
         </div>
 
-        {/* Модальне вікно підтвердження видалення */}
         {showDeleteConfirm && (
           <div
             className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center"
-            onClick={cancelDelete} // Закриваємо модальне вікно підтвердження при кліку поза ним
+            onClick={cancelDelete}
           >
             <div
               className="bg-black p-6 rounded-lg text-white max-w-sm w-full"
-              onClick={(e) => e.stopPropagation()} // Зупиняємо поширення події
+              onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-xl font-bold">Видалити пост?</h3>
               <p className="mt-2">Це не можна буде скасувати.</p>

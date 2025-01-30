@@ -7,27 +7,33 @@ import {
   saveImagesToLocalStorage,
 } from "@/utils/localStorageUtils";
 import Modal from "@/components/ProfileModalComponent";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Logo from "@/images/logo.jpg";
 
 export default function InstagramProfile() {
   const [images, setImages] = useState<string[]>([]);
   const [profile, setProfile] = useState({
     username: "montre_d.art_",
     posts: 0,
-    followers: 438,
-    following: 21,
-    name: "Paul",
+    followers: 54738,
+    following: 1,
+    name: "Montre d'Art",
     avatar: "",
+    characteristics: [
+      "✨ Вишукані годинники для стильних моментів.",
+      "⌚️ Елегантність і якість.",
+      "📦 Доставка по Україні.",
+      "💬 Пишіть у Direct для замовлення!",
+    ],
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [darkMode, setDarkMode] = useState<boolean>(true);
 
-  // Оновлюємо кількість дописів залежно від кількості зображень
   useEffect(() => {
     setProfile((prev) => ({ ...prev, posts: images.length }));
   }, [images]);
 
-  // Завантажуємо зображення з localStorage при першому завантаженні
   useEffect(() => {
     const storedImages = getImagesFromLocalStorage();
     if (storedImages) {
@@ -35,7 +41,6 @@ export default function InstagramProfile() {
     }
   }, []);
 
-  // Функція для збереження зображень у localStorage
   useEffect(() => {
     if (images.length > 0) {
       saveImagesToLocalStorage(images);
@@ -68,46 +73,97 @@ export default function InstagramProfile() {
     closeModal();
   };
 
-  // Функція для обробки перетягування
-  const onDragEnd = (result: any) => {
-    const { destination, source } = result;
-    if (!destination) return; // Якщо елемент не був відпущений на допустиму зону
+  const handleDeleteAllImages = () => {
+    setImages([]);
+    saveImagesToLocalStorage([]);
+  };
 
-    const reorderedImages = Array.from(images);
-    const [removed] = reorderedImages.splice(source.index, 1);
-    reorderedImages.splice(destination.index, 0, removed);
+  const handleDragStart = (
+    event: React.DragEvent<HTMLDivElement>,
+    index: number
+  ) => {
+    setDraggedIndex(index);
+    const target = event.target as HTMLElement;
+    target.classList.add("scale-105");
+  };
 
-    setImages(reorderedImages); // Оновлюємо порядок зображень
-    saveImagesToLocalStorage(reorderedImages); // Зберігаємо в localStorage
+  const handleDragEnd = (event: React.DragEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    target.classList.remove("scale-105");
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (
+    event: React.DragEvent<HTMLDivElement>,
+    index: number
+  ) => {
+    event.preventDefault();
+    const draggedIndex = parseInt(event.dataTransfer.getData("imageIndex"));
+    const updatedImages = [...images];
+
+    const [draggedImage] = updatedImages.splice(draggedIndex, 1);
+    updatedImages.splice(index, 0, draggedImage);
+
+    setImages(updatedImages);
+    saveImagesToLocalStorage(updatedImages);
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
   };
 
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div
+      className={`${
+        darkMode ? "bg-black text-white" : "bg-white text-black"
+      } min-h-screen transition-colors duration-300`}
+    >
       <div className="max-w-4xl mx-auto p-4">
-        {/* Профіль */}
-        <div className="flex items-center space-x-4">
-          <div
-            className="w-20 h-20 bg-gray-500 rounded-full flex-shrink-0"
-            style={{
-              backgroundImage: `url(${
-                profile.avatar || "/default-avatar.png"
-              })`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          ></div>
+        <button
+          onClick={toggleDarkMode}
+          className="absolute top-4 right-4 p-2 bg-gray-700 text-white rounded-full"
+        >
+          {darkMode ? (
+            <span className="material-icons">Light</span>
+          ) : (
+            <span className="material-icons">Dark</span>
+          )}
+        </button>
+
+        <div className="p-10 flex items-center space-x-4">
+          <Image
+            src={profile.avatar || Logo}
+            alt="Logo"
+            className="object-cover w-44 h-44 bg-gray-500 rounded-full mr-[44px]"
+          />
+
           <div>
-            <h2 className="text-2xl font-bold">{profile.username}</h2>
-            <div className="flex space-x-4 text-gray-400">
-              <span>{profile.posts} дописів</span>
-              <span>Читає: {profile.followers}</span>
-              <span>Стежить: {profile.following}</span>
+            <h2 className="text-2xl font-bold mb-[24px]">{profile.username}</h2>
+            <div className="flex space-x-4">
+              <span className="text-sm text-gray-400">
+                {profile.posts} дописів
+              </span>
+              <span className="text-sm text-gray-400">
+                Читає: {profile.followers}
+              </span>
+              <span className="text-sm text-gray-400">
+                Стежить: {profile.following}
+              </span>
             </div>
-            <p className="mt-2">{profile.name}</p>
+            <p className="mt-2 text-lg">{profile.name}</p>
+            <ul className="mt-4 text-sm">
+              {profile.characteristics.map((item, index) => (
+                <li key={index} className="mb-2">
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        {/* Вкладки */}
         <div className="mt-6 border-t border-gray-700">
           <div className="flex justify-center my-4">
             <label
@@ -126,54 +182,72 @@ export default function InstagramProfile() {
           </div>
 
           <div className="flex justify-center space-x-8 mt-4 text-sm">
-            <button className="text-white border-b-2 border-white pb-2">
+            <button
+              className={`${
+                darkMode
+                  ? "text-white border-b-2 border-white"
+                  : "text-black border-b-2 border-black"
+              } pb-2`}
+            >
               Дописи
             </button>
-            <button className="text-gray-400 pb-2">Збережено</button>
-            <button className="text-gray-400 pb-2">Позначено</button>
+            <button
+              className={`${darkMode ? "text-gray-400" : "text-gray-800"} pb-2`}
+            >
+              Збережено
+            </button>
+            <button
+              className={`${darkMode ? "text-gray-400" : "text-gray-800"} pb-2`}
+            >
+              Позначено
+            </button>
           </div>
+
+          {/* Кнопка для видалення всіх постів, з'являється лише коли є пости */}
+          {images.length > 0 && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={handleDeleteAllImages}
+                className="text-red-500 hover:text-red-300"
+              >
+                Видалити всі пости
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Контент вкладки */}
         <div className="mt-6">
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="images-grid" direction="horizontal">
-              {(provided) => (
+          {images.length === 0 ? (
+            <p className="text-center text-[36px] font-bold">
+              Ще немає дописів
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {images.map((src, index) => (
                 <div
-                  className="grid grid-cols-3 gap-2"
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
+                  key={index}
+                  className="relative h-[270px] w-full cursor-pointer"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, index)}
                 >
-                  {images.map((src, index) => (
-                    <Draggable key={index} draggableId={src} index={index}>
-                      {(provided) => (
-                        <div
-                          className="relative h-[270px] w-full"
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <Image
-                            src={src}
-                            alt="Uploaded"
-                            width={500}
-                            height={500}
-                            className="rounded-md object-cover h-[270px] w-full cursor-pointer"
-                            onClick={() => openModal(src)} // Відкриваємо модальне вікно при кліку
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
+                  <Image
+                    src={src}
+                    alt="Uploaded"
+                    width={500}
+                    height={500}
+                    className="object-cover h-[270px] w-full"
+                    onClick={() => openModal(src)}
+                  />
                 </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Модальне вікно */}
       <Modal
         isOpen={isModalOpen}
         closeModal={closeModal}

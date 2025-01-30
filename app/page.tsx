@@ -85,6 +85,8 @@ export default function InstagramProfile() {
     setDraggedIndex(index);
     const target = event.target as HTMLElement;
     target.classList.add("scale-105");
+
+    event.dataTransfer.setData("imageIndex", index.toString());
   };
 
   const handleDragEnd = (event: React.DragEvent<HTMLDivElement>) => {
@@ -203,7 +205,6 @@ export default function InstagramProfile() {
             </button>
           </div>
 
-          {/* Кнопка для видалення всіх постів, з'являється лише коли є пости */}
           {images.length > 0 && (
             <div className="mt-4 text-center">
               <button
